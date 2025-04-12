@@ -1,0 +1,160 @@
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    logging:
+      driver: none
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  backend-test:
+    build:
+      context: backend
+      dockerfile: ../Dockerfile.backend
+    environment:
+      DB_ADDRESS: mongodb://mongo:27017/mestodb
+    command: npm run lint
+    restart: 'no'
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: backend
+      dockerfile: ../Dockerfile.backend
+    environment:
+      DB_ADDRESS: mongodb://mongo:27017/mestodb
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - 3001:3000
+    healthcheck:
+      interval: 10s
+      timeout: 2s
+      start_period: 15s
+      retries: 5
+      test: node healthcheck.js
+
+  frontend-test:
+    build:
+      context: frontend
+      dockerfile: ../Dockerfile.frontend
+    command: yarn test:microfrontend
+    restart: 'no'
+    environment:
+      CI: true
+
+  common:
+    build:
+      context: ./frontend/microfrontend/common
+      dockerfile: ../../microfrontend/common/Dockerfile
+    ports:
+      - "8084:8084"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      interval: 10s
+      timeout: 2s
+      start_period: 15s
+      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8084"]
+
+  auth:
+    build:
+      context: ./frontend/microfrontend/auth
+      dockerfile: ../../microfrontend/auth/Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      backend:
+        condition: service_healthy
+      common:
+        condition: service_healthy
+    healthcheck:
+      interval: 10s
+      timeout: 2s
+      start_period: 15s
+      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+
+  profile:
+    build:
+      context: ./frontend/microfrontend/profile
+      dockerfile: ../../microfrontend/profile/Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      backend:
+        condition: service_healthy
+      common:
+        condition: service_healthy
+    healthcheck:
+      interval: 10s
+      timeout: 2s
+      start_period: 15s
+      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8082"]
+
+  card:
+    build:
+      context: ./frontend/microfrontend/card
+      dockerfile: ../../microfrontend/card/Dockerfile
+    ports:
+      - "8083:8083"
+    depends_on:
+      backend:
+        condition: service_healthy
+      common:
+        condition: service_healthy
+    healthcheck:
+      interval: 10s
+      timeout: 2s
+      start_period: 15s
+      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8083"]
+
+  layout:
+    build:
+      context: ./frontend/microfrontend/layout
+      dockerfile: ../../microfrontend/layout/Dockerfile
+    ports:
+      - "8085:8085"
+    depends_on:
+      backend:
+        condition: service_healthy
+      common:
+        condition: service_healthy
+    healthcheck:
+      interval: 10s
+      timeout: 2s
+      start_period: 15s
+      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8085"]
+
+  host:
+    build:
+      context: ./frontend/microfrontend/host
+      dockerfile: ../../microfrontend/host/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+      common:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      profile:
+        condition: service_healthy
+      card:
+        condition: service_healthy
+      layout:
+        condition: service_healthy
