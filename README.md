@@ -51,4 +51,4 @@
 
 ## Задание 2
 
-[Схема взаимодействия микросервисов](task_2.drawio)
+[Схема взаимодействия микросервисов](https://github.com/donottaket/yandex_practicum-software_architect-project_1/blob/mesto/task_2.drawio)
