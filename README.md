@@ -45,10 +45,10 @@
   docker compose -f docker-compose.yml up --build
 ```
 
-Для проверки работоспособности микрофронтендов можно пройти по ссылке: http://localhost:8080
+Для проверки работоспособности микрофронтендов можно пройти по ссылке: http://localhost:8080.
 
 ---
 
 ## Задание 2
 
-[Схема взаимодействия микросервисов (вкладка "Микросервисы")](https://github.com/donottaket/yandex_practicum-software_architect-project_1/blob/mesto/task_2.drawio)
+[Схема взаимодействия микросервисов (вкладка "Микросервисы")](https://github.com/donottaket/yandex_practicum-software_architect-project_1/blob/mesto/task_2.drawio).
